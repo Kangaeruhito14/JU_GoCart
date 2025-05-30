@@ -1,0 +1,71 @@
+{% extends 'gocart/base.html' %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+  <div class="card p-4 shadow-lg" style="max-width: 480px; width: 100%; border-radius: 25px; background-color: #fce4ec;">
+    <h5 class="text-center text-primary mb-3" style="font-family: 'Comic Sans MS', cursive;">Choose Your Stops & Payment 💖</h5>
+    
+    {% if total_fare %}
+      <div class="alert alert-info text-center mb-4" style="font-size: 18px; font-family: 'Comic Sans MS', cursive; border-radius: 15px;">
+        Total Fare for Selected Seats: <strong style="color: #d81b60;">৳ {{ total_fare }}</strong>
+      </div>
+    {% endif %}
+    
+    <form method="post" action="">
+      {% csrf_token %}
+
+      <!-- From Stop -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold text-dark" style="font-family: 'Comic Sans MS', cursive;">From Stop</label>
+        {% if from_stop %}
+          <div class="form-control bg-light text-dark" style="border-radius: 12px;" readonly>
+            {{ from_stop.name }}
+          </div>
+          <input type="hidden" name="from_stop" value="{{ from_stop.id }}">
+        {% else %}
+          <div class="text-danger">From stop not available.</div>
+        {% endif %}
+      </div>
+
+      <!-- To Stop -->
+      <div class="mb-4">
+        <label class="form-label fw-semibold text-dark" style="font-family: 'Comic Sans MS', cursive;">To Stop</label>
+        {% if to_stop %}
+          <div class="form-control bg-light text-dark" style="border-radius: 12px;" readonly>
+            {{ to_stop.name }}
+          </div>
+          <input type="hidden" name="to_stop" value="{{ to_stop.id }}">
+        {% else %}
+          <div class="text-danger">To stop not available.</div>
+        {% endif %}
+      </div>
+      
+      <!-- Payment Methods -->
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="radio" name="payment_method" value="bkash" required id="bkash" style="border-radius: 50%; transform: scale(1.1);">
+        <label class="form-check-label" for="bkash" style="font-size: 18px; font-family: 'Comic Sans MS', cursive; color: #ff66b2;">
+          bKash 💰
+        </label>
+      </div>
+      
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="radio" name="payment_method" value="nagad" id="nagad" style="border-radius: 50%; transform: scale(1.1);">
+        <label class="form-check-label" for="nagad" style="font-size: 18px; font-family: 'Comic Sans MS', cursive; color: #ff66b2;">
+          Nagad 💳
+        </label>
+      </div>
+      
+      <div class="form-check mb-4">
+        <input class="form-check-input" type="radio" name="payment_method" value="rocket" id="rocket" style="border-radius: 50%; transform: scale(1.1);">
+        <label class="form-check-label" for="rocket" style="font-size: 18px; font-family: 'Comic Sans MS', cursive; color: #ff66b2;">
+          Rocket 🚀
+        </label>
+      </div>
+      
+      <button type="submit" class="btn btn-danger btn-lg btn-block shadow-sm" style="border-radius: 30px; font-size: 20px; font-family: 'Comic Sans MS', cursive; transition: all 0.3s ease-in-out;">
+        💖 Pay Now
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

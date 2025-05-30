@@ -1,0 +1,29 @@
+{% extends "gocart/base.html" %}
+{% block content %}
+
+<div class="container py-5" style="margin-top: 80px;">
+    <div class="card shadow-lg rounded-4 p-4">
+        <h2 class="text-center text-primary mb-4">🎫 Your Ticket Details</h2>
+
+        <ul class="list-unstyled fs-5">
+            <li><strong>Name:</strong> {{ booking.student.username }}</li>
+            <li><strong>From:</strong> {{ booking.from_stop.name }}</li>
+            <li><strong>To:</strong> {{ booking.to_stop.name }}</li>
+            <li><strong>Cart Number:</strong> {{ booking.schedule.cart.number_plate }}</li>
+            <li><strong>Booked Seats:</strong> 
+                {% for seat in booking.seats.all %}
+                    {{ seat.seat_number }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </li>
+            <li><strong>Amount Paid:</strong> ৳{{ booking.fare }}</li>
+            <li><strong>Transaction ID:</strong> {{ booking.payment_id }}</li>
+        </ul>
+
+        <div class="d-flex justify-content-center gap-4 mt-4">
+            <a href="{% url 'download_ticket_pdf' booking.id %}" target="_blank" class="btn btn-primary btn-lg">Download PDF Ticket</a>
+            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg">Back to Home</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

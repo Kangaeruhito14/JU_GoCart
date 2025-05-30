@@ -1,0 +1,157 @@
+{% extends 'gocart/base.html' %}
+
+{% block content %}
+<div class="container py-5" style="margin-top: 70px;">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-lg rounded-3">
+        <div class="card-header text-center" style="background-color: #4caf50; color: white">
+          <h3>Cart Details</h3>
+        </div>
+        <div class="card-body">
+          <!-- Cart Image -->
+          <div class="text-center mb-4">
+            <img
+              src="https://res.cloudinary.com/dmpclkrea/image/upload/v1745843951/Pic-01_hwhabw.png"
+              alt="Cart Image"
+              class="rounded"
+              style="width: 300px; height: 150px; object-fit: cover"
+            />
+          </div>
+
+          <!-- Cart Info -->
+          <h4 class="text-center" style="color: #4caf50">
+            Cart Number: {{ cart.number_plate }}
+          </h4>
+          <p class="text-center text-muted">
+            Assigned Driver: {{ cart.driver.get_full_name }}
+          </p>
+
+          <div class="list-group mb-4">
+            <div class="list-group-item">
+              <strong>Route Assigned:</strong> {{ cart.route.name|default:"No route assigned" }}
+            </div>
+            <div class="list-group-item"><strong>Capacity:</strong> {{ cart.capacity }}</div>
+          </div>
+
+          <!-- Seat Layout -->
+          <h5 class="text-center mb-3">Select Your Seat</h5>
+          <form method="post" action="{% url 'book_seat' schedule.id %}" id="seat-booking-form">
+            {% csrf_token %}
+            <div class="mb-4">
+              {% regroup seats by seat_row as seat_rows %}
+              {% for seat in seats %}
+                {% if forloop.first %}
+                  <div class="row justify-content-center">
+                {% endif %}
+
+                <div class="col-2 text-center mb-3">
+                  <div class="seat-wrapper m-2" style="width: 110px; cursor: pointer;"
+                       data-seat-id="{{ seat.id }}" data-seat-number="{{ seat.seat_number }}">
+                    {% if seat.seat_number in booked_seats %}
+                      <i class="fa-solid fa-couch text-danger" style="font-size: 30px;"></i><br />
+                      <span class="badge bg-danger">{{ seat.seat_number }}</span>
+                    {% else %}
+                      <i class="fa-solid fa-couch text-success seat-icon" style="font-size: 30px;"></i><br />
+                      <span class="badge bg-success seat-badge">{{ seat.seat_number }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+
+                {% if seat.seat_number == "A1" %}
+                  <!-- Driver seat added after A1 -->
+                  <div class="col-2 text-center mb-3">
+                    <div class="m-2" style="width: 110px;">
+                      <i class="fa-solid fa-couch text-dark" style="font-size: 30px;"></i><br />
+                      <span class="badge bg-dark">Driver</span>
+                    </div>
+                  </div>
+                {% endif %}
+
+                {% if forloop.counter|divisibleby:2 and not forloop.last %}
+                  </div><div class="row justify-content-center">
+                {% elif forloop.last %}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+
+            <!-- Hidden input field to submit selected seats -->
+            <div id="selected_seats_input" style="display: none">
+              <input type="hidden" name="selected_seats" id="selected_seats" value="" />
+            </div>
+
+            <div class="text-center">
+              <button type="submit" class="btn btn-primary">Confirm Booking</button>
+            </div>
+          </form>
+
+          <!-- Action Buttons -->
+          <div class="text-center mt-4">
+            <a href="{% url 'search_carts' %}" class="btn btn-secondary">Back to Cart List</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<style>
+  .selected-seat {
+    color: #ffc107 !important;
+    transform: scale(1.2);
+    transition: 0.3s ease;
+  }
+
+  .seat-badge.selected-seat {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+  }
+
+  .seat-wrapper:hover .seat-icon {
+    transform: scale(1.1);
+    transition: 0.2s ease-in-out;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const seatWrappers = document.querySelectorAll(".seat-wrapper");
+    const selectedSeatsInput = document.getElementById("selected_seats");
+    const form = document.getElementById("seat-booking-form");
+
+    let selectedSeats = [];
+
+    seatWrappers.forEach(function (wrapper) {
+      wrapper.addEventListener("click", function () {
+        const seatId = wrapper.getAttribute("data-seat-id");
+        const icon = wrapper.querySelector(".seat-icon");
+        const badge = wrapper.querySelector(".seat-badge");
+
+        // Toggle logic
+        if (selectedSeats.includes(seatId)) {
+          selectedSeats = selectedSeats.filter((id) => id !== seatId);
+          if (icon) icon.classList.remove("selected-seat");
+          if (badge) badge.classList.remove("selected-seat");
+        } else {
+          selectedSeats.push(seatId);
+          if (icon) icon.classList.add("selected-seat");
+          if (badge) badge.classList.add("selected-seat");
+        }
+
+        selectedSeatsInput.value = selectedSeats.join(",");
+      });
+    });
+
+    // Form validation to check if any seat is selected
+    form.addEventListener("submit", function (e) {
+      if (selectedSeats.length === 0) {
+        e.preventDefault(); // Prevent form submission
+        alert("Please select at least one seat.");
+      }
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}

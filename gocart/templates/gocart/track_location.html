@@ -1,0 +1,185 @@
+{% extends "gocart/base.html" %}
+{% load static %}
+
+{% block title %}Track Your GoCart{% endblock %}
+
+{% block extra_head %}
+<style>
+    body {
+        background: linear-gradient(135deg, #f0f9ff, #e0f7fa);
+        min-height: 100vh;
+        overflow-x: hidden;
+        padding-top: 100px;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .timeline {
+        position: relative;
+        margin: 0 auto;
+        padding: 20px 0;
+        width: 90%;
+        max-width: 400px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 25px;
+        width: 4px;
+        height: 100%;
+        background: #d3d3d3;
+    }
+
+    .stop {
+        position: relative;
+        margin-bottom: 60px;
+        padding-left: 60px;
+        display: flex;
+        align-items: center;
+    }
+
+    .stop:last-child {
+        margin-bottom: 0;
+    }
+
+    .stop .circle {
+        position: absolute;
+        left: 17px;
+        top: 0;
+        width: 16px;
+        height: 16px;
+        background: #d3d3d3;
+        border-radius: 50%;
+        border: 2px solid #555;
+    }
+
+    .stop.active .circle {
+        background: #4CAF50;
+        border-color: #4CAF50;
+    }
+
+    .stop .details {
+        background: #ffffff;
+        padding: 10px 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        width: 100%;
+    }
+
+    .stop .details h5 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #333;
+    }
+
+    .stop .details p {
+        margin: 5px 0 0;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    /* Rickshaw Icon */
+    .rickshaw {
+        position: absolute;
+        left: 0px;
+        transform: translateX(-50%);
+        font-size: 24px;
+        color: #4CAF50;
+        animation: bounce 1s infinite alternate;
+    }
+
+    @keyframes bounce {
+        from { transform: translateX(-50%) translateY(0); }
+        to { transform: translateX(-50%) translateY(-10px); }
+    }
+
+    /* Complete Message */
+    .complete-message {
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #4CAF50;
+        margin-top: 50px;
+        animation: fadeIn 1s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .btn-back {
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center text-success mb-5">🛺 Track Your GoCart Ride</h2>
+
+    <div class="timeline" id="timeline">
+        {% for route_stop in route_stops %}
+        <div class="stop {% if forloop.first %}active{% endif %}" id="stop-{{ forloop.counter }}">
+            <div class="circle"></div>
+            <div class="rickshaw" id="rickshaw-{{ forloop.counter }}"
+     {% if not forloop.first %}style="display: none;"{% endif %}>🛺</div>
+            <div class="details">
+                <h5>{{ route_stop.stop.name }}</h5>
+                <p id="eta-{{ forloop.counter }}">Estimated Time: --</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>    
+
+    <div id="completed" class="complete-message" style="display:none;">
+        🎉 Journey Completed!
+        <div class="text-center">
+            <a href="{% url 'home' %}" class="btn btn-success btn-back mt-3">Back to Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentStop = 1;
+    const totalStops = Number("{{ route_stops|length }}");
+
+    function moveRickshaw() {
+        // Hide current rickshaw
+        document.getElementById(`rickshaw-${currentStop}`).style.display = 'none';
+
+        // Mark current stop as completed
+        const currentCircle = document.querySelector(`#stop-${currentStop} .circle`);
+        currentCircle.style.background = '#4CAF50';
+        currentCircle.style.borderColor = '#4CAF50';
+
+        if (currentStop < totalStops) {
+            currentStop++;
+            document.getElementById(`rickshaw-${currentStop}`).style.display = 'block';
+            document.getElementById(`stop-${currentStop}`).classList.add('active');
+            updateETA();
+        } else {
+            document.getElementById('completed').style.display = 'block';
+        }
+    }
+
+    function updateETA() {
+        for (let i = currentStop; i <= totalStops; i++) {
+            let minutes = (i - currentStop) * 2;
+            if (minutes === 0) {
+                document.getElementById(`eta-${i}`).innerText = "Arriving...";
+            } else {
+                document.getElementById(`eta-${i}`).innerText = `ETA: ${minutes} mins`;
+            }
+        }
+    }
+
+    // Simulate rickshaw moving every 5 seconds
+    setInterval(() => {
+        moveRickshaw();
+    }, 5000);
+</script>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'gocart/base.html' %}
+{% block title %}Ride History{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="margin-top: 80px;">
+  <div class="card shadow p-4 rounded-4">
+    <h2 class="text-center mb-4 text-success">📜 Ride History</h2>
+
+    {% if enriched_bookings %}
+      <div class="list-group">
+        {% for item in enriched_bookings %}
+          <div class="list-group-item mb-3 shadow-sm p-3 rounded">
+            <div class="d-flex justify-content-between">
+              <div style="flex: 1;">
+                <h5 class="mb-1">🛺 Cart: {{ item.booking.schedule.cart.number_plate }}</h5>
+                <p class="mb-0"><strong>Route:</strong> {{ item.booking.from_stop.name }} → {{ item.booking.to_stop.name }}</p>
+
+                <p class="mb-0"><strong>Seats:</strong> 
+                  {% for seat in item.seat_booking_details %}
+                    {{ seat }}{% if not forloop.last %}, {% endif %}
+                  {% endfor %}
+                </p>
+
+                <small class="text-muted">
+                  Date: {{ item.booking.schedule.travel_date }} | Time: {{ item.booking.schedule.start_time }}
+                </small>
+              </div>
+              <div class="text-end">
+                <a href="{% url 'download_ticket' item.booking.id %}" class="btn btn-sm btn-outline-primary mt-2">View Ticket</a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert alert-info text-center">
+        No ride history found.
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

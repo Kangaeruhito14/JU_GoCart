@@ -1,0 +1,49 @@
+{% extends "gocart/base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4 text-success">Available GoCarts</h2>
+
+    {% if schedules %}
+        <div class="list-group">
+            {% for schedule in schedules %}
+                <!-- Card for each GoCart -->
+                <div class="list-group-item mb-3 shadow-sm rounded p-3" style="background-color: #f9f9f9;">
+                    <!-- Header with Cart Number and Driver Info -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="text-success">{{ schedule.cart.number_plate }}</h4>
+                        <small class="text-muted fs-6">Driver: {{ schedule.cart.driver.get_full_name }}</small>
+                    </div>
+
+                    <!-- Route Information -->
+                    <p class="mb-1"><strong>Route:</strong> {{ schedule.cart.route.name }}</p>
+
+                    <!-- Path with Stops -->
+                    <p class="mb-2"><strong>Path:</strong> 
+                        {% for route_stop in schedule.cart.route.routestop_set.all %}
+                            {{ route_stop.stop.name }}{% if not forloop.last %} → {% endif %}
+                        {% endfor %}
+                    </p>
+
+                    <!-- Schedule Information -->
+                    <h6 class="mt-2">Schedule:</h6>
+                    <ul class="list-unstyled mb-3 fs-6">
+                        <li><strong>Date:</strong> {{ schedule.travel_date }}</li>
+                        <li><strong>Start:</strong> {{ schedule.start_time }} | <strong>Drop:</strong> {{ schedule.drop_time }}</li>
+                    </ul>
+
+                    <!-- Action Button -->
+                    <div class="d-flex justify-content-center gap-2">
+                        <a href="{% url 'cart_detail' schedule.id %}" class="btn btn-success btn-sm px-4 py-2">View & Book</a>
+                        <a href="{% url 'track_location' schedule.id %}" class="btn btn-info btn-sm px-4 py-2">View Location</a>
+                    </div>                    
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- No GoCarts Found -->
+        <div class="alert alert-warning text-center" role="alert">
+            No GoCarts found for the selected route and date range.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,170 @@
+{% extends 'gocart/base.html' %}
+{% load custom_tags %}
+{% block title %}Trip Details{% endblock %}
+
+{% block extra_head %}
+<!-- Font Awesome for seat icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style>
+  .seat-layout {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+
+  .seat {
+    background-color: #27ae60;
+    color: white;
+    padding: 1.2rem;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 1.5rem;
+    position: relative;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .seat:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+  }
+
+  .seat.booked {
+    background-color: #e74c3c;
+    cursor: pointer;
+  }
+
+  .seat i {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .seat.badge::after {
+    content: '+#';
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    background-color: rgba(0,0,0,0.6);
+    color: #fff;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 50%;
+  }
+
+  .seat.empty {
+    background: transparent;
+    pointer-events: none;
+  }
+
+  .modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+    transform: translateY(0); /* Remove initial push-up */
+  }
+
+  .modal.show .modal-dialog {
+    transform: translateY(0); /* Centered exactly */
+  }
+
+  .modal-dialog {
+    max-width: 500px;
+    margin: auto;
+  }
+
+  .modal-content {
+    border-radius: 15px;
+    padding: 1.5rem;
+    border: none;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    max-height: 90vh;          /* Prevent overflow */
+    overflow-y: auto;          /* Scroll if content overflows */
+  }
+
+  .modal-header {
+    border-bottom: none;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="margin-top: 80px;">
+  <a href="{% url 'driver_trips' %}" class="btn btn-outline-secondary mb-4">← Back to Trips</a>
+  <div class="card shadow p-4">
+    <h3 class="mb-2">Cart {{ schedule.cart.number_plate }} — {{ schedule.travel_date }}</h3>
+    <p class="text-muted">Route: {{ schedule.cart.route.name }} | Capacity: {{ schedule.cart.capacity }}</p>
+
+    <div class="seat-layout">
+      {% for seat in seats %}
+        {% if forloop.counter0|divisibleby:2 and not forloop.first %}
+          <div class="seat empty"></div>
+        {% endif %}
+        {% if seat.is_booked %}
+          {% with seat_to_booking|dictkey:seat.id as booking %}
+            <div class="seat booked {% if user_seats|dictkey:booking.student.username|length > 1 %}badge{% endif %}"
+                 data-bs-toggle="modal" data-bs-target="#seatModal"
+                 data-user="{{ booking.student.username }}"
+                 data-from="{{ booking.from_stop.name }}"
+                 data-to="{{ booking.to_stop.name }}">
+              <i class="fas fa-chair"></i>
+              {{ seat.seat_number }}
+            </div>
+          {% endwith %}
+        {% else %}
+          <div class="seat"
+               onclick="showFreeSeat('{{ seat.seat_number }}')">
+            <i class="fas fa-chair"></i>
+            {{ seat.seat_number }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="seatModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-user-circle me-2"></i>Passenger Info</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>User:</strong> <span id="mUser"></span></p>
+        <p><strong>From → To:</strong> <span id="mFromTo"></span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Free Seat Modal -->
+<div class="modal fade" id="freeSeatModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <div class="modal-body">
+        <h5 class="mb-3 text-success"><i class="fas fa-check-circle me-2"></i>Seat is Free</h5>
+        <p>Seat <strong id="freeSeatNumber"></strong> is currently available.</p>
+        <button class="btn btn-outline-success" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  var seatModal = document.getElementById('seatModal');
+  seatModal.addEventListener('show.bs.modal', function (event) {
+    var btn = event.relatedTarget;
+    document.getElementById('mUser').innerText = btn.dataset.user;
+    document.getElementById('mFromTo').innerText = btn.dataset.from + ' → ' + btn.dataset.to;
+  });
+
+  function showFreeSeat(seatNum) {
+    document.getElementById('freeSeatNumber').innerText = seatNum;
+    new bootstrap.Modal(document.getElementById('freeSeatModal')).show();
+  }
+</script>
+{% endblock %}

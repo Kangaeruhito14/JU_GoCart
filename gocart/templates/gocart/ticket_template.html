@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GoCart Ticket</title>
+  <style>
+    @page {
+      size: 110mm 135mm;
+      margin: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      color: #222;
+      background: #fff;
+      margin: 0;
+      padding: 0;
+    }
+
+    .ticket-wrapper {
+      position: relative;
+      padding: 15mm;
+      border: 2px dashed #4CAF50;
+      border-radius: 10px;
+      margin: 5mm;
+      background-color: #fefefe;
+      height: 100%;
+      box-sizing: border-box;
+    }
+
+    /* ✅ Centered Watermark */
+    .ticket-wrapper::before {
+      content: "";
+      position: absolute;
+      top: 1%;
+      left: 1%;
+      width: 100%;
+      height: 100%;
+      background-image: url('https://res.cloudinary.com/dmpclkrea/image/upload/v1747642645/jahangirnagar-university-logo-removebg-preview_l0dgwn.png');
+      background-repeat: no-repeat;
+      background-size: 60mm;
+      background-position: center;
+      opacity: 0.4;
+      z-index: 0;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .header img {
+      height: 40px;
+      vertical-align: middle;
+    }
+
+    .header h2 {
+      font-size: 25px;
+      color: #2e7d32;
+      margin-top: 5px;
+    }
+
+    .ticket-row {
+      margin: 6px 0;
+      font-size: 20px;
+    }
+
+    .label {
+      font-weight: bold;
+      display: inline-block;
+      width: 110px;
+      color: #111;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 16px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="ticket-wrapper">
+    <div class="content">
+      <!-- Header -->
+      <div class="header">
+        <img src="https://res.cloudinary.com/dmpclkrea/image/upload/v1747638832/gocart-logo-removebg-preview_lebjpp.png" alt="GoCart Logo">
+        <h2>GoCart Ride Ticket</h2>
+      </div>
+
+      <!-- Ticket Details -->
+      <div class="ticket-row"><span class="label">Name:</span> {{ booking.student.get_full_name }}</div>
+      <div class="ticket-row"><span class="label">From:</span> {{ booking.from_stop.name }}</div>
+      <div class="ticket-row"><span class="label">To:</span> {{ booking.to_stop.name }}</div>
+      <div class="ticket-row"><span class="label">Cart:</span> {{ booking.schedule.cart.number_plate }}</div>
+      <div class="ticket-row"><span class="label">Seats:</span>
+        {% for seat in booking.seats.all %}
+          {{ seat.seat_number }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+      </div>
+      <div class="ticket-row"><span class="label">Fare Paid:</span> ৳{{ booking.fare }}</div>
+      <div class="ticket-row"><span class="label">Txn ID:</span> {{ booking.payment_id }}</div>
+      <div class="ticket-row"><span class="label">Date:</span> {{ booking.schedule.travel_date }}</div>
+      <div class="ticket-row"><span class="label">Departure:</span> {{ booking.schedule.start_time }}</div>
+      <div class="ticket-row"><span class="label">Drop Time:</span> {{ booking.schedule.drop_time }}</div>
+
+      <!-- Footer -->
+      <div class="footer">
+        Thank you for riding with <strong>JU EV GoCart</strong>!<br>
+        Have a safe and pleasant journey 💚
+      </div>
+    </div>
+  </div>
+</body>
+</html>

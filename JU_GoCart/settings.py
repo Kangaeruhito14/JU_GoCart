@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -81,6 +82,18 @@ DATABASES = {
     }
 }
 
+PDFKIT_OPTIONS = {
+    'page-width': '110mm',
+    'page-height': '135mm',
+    'margin-top': '0mm',
+    'margin-right': '0mm',
+    'margin-bottom': '0mm',
+    'margin-left': '0mm',
+    'encoding': "UTF-8",
+    'dpi': 400,
+    'enable-local-file-access': ''
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -117,8 +130,24 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+LOGIN_URL = 'login'
+
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# DEFAULT_FROM_EMAIL = 'noreply@gocart.com'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Or your provider
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'fantasyfalcoon91@gmail.com'
+EMAIL_HOST_PASSWORD = 'wkqjgjdbpkxqfwhl'
+DEFAULT_FROM_EMAIL = 'JU GoCart <fantasyfalcoon91@gmail.com>'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+MEDIA_URL = '/media/'  # URL to access media files
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Directory to store uploaded files
